@@ -1,0 +1,16 @@
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\bin\Debug\ShoppingList.exe.config
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\bin\Debug\ShoppingList.exe
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\bin\Debug\ShoppingList.pdb
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.csprojResolveAssemblyReference.cache
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\MainWindow.g.cs
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\App.g.cs
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList_MarkupCompile.cache
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList_MarkupCompile.lref
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\MainWindow.baml
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.g.resources
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.Properties.Resources.resources
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.csproj.GenerateResource.Cache
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.exe
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\ShoppingList.pdb
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\App.baml
+C:\Users\Dominic\Documents\Visual Studio 2015\Projects\Domestic\ShoppingList\ShoppingList\obj\Debug\GeneratedInternalTypeHelper.g.cs

@@ -1,0 +1,783 @@
+﻿<Window x:Name="ShoppingList" x:Class="ShoppingList.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ShoppingList"
+        mc:Ignorable="d"
+        Title="Shopping List" 
+        Width="500" 
+        Height="700"
+        WindowStartupLocation="CenterScreen" 
+        Background="{StaticResource mainColor}" 
+        >
+    <!--Main grid for window. Split into 3 rows. First row is the menu bar, second is the
+    title label and the third contains the expanders that hold the list.-->  
+    <Grid x:Name="mainGrid">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!--Menu bar. Contains one header which contains 4 items: 
+        A "New" button bound to the "New List" command, 
+        an Edit Categories toggle button that brings up a popup menu,
+        an Edit Item Library toggle button that brings up a popup menu,
+        and an "Exit" button bound to the "Exit App" command-->
+        <!--#region MenuBar-->
+        <Menu IsMainMenu="True" 
+              Grid.Row="0" 
+              Background="{DynamicResource secondColor}"
+              FontFamily="{StaticResource mainFont}"
+              >
+            <MenuItem Header="Menu" Template="{StaticResource myMenuHeader}">
+                <MenuItem Header="New"
+                          Command="{Binding Path=DataContext.NewListCmd, 
+                                            RelativeSource={RelativeSource Mode=FindAncestor, 
+                                            AncestorType={x:Type Window}}}"
+                          CommandParameter="{Binding}"
+                          >
+                    <MenuItem.Icon>
+                        <Image Source="Images/NewFile_16x.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Restore Last List"
+                          Command="{Binding Path=DataContext.LastListCmd, 
+                                            RelativeSource={RelativeSource Mode=FindAncestor, 
+                                            AncestorType={x:Type Window}}}"
+                          CommandParameter="{Binding}"
+                          >
+                </MenuItem>
+                <MenuItem Header="Edit Categories"
+                          x:Name="mnuEditCats"
+                          IsCheckable="True"
+                          >
+                    
+                </MenuItem>
+                <MenuItem Header="Edit Item Library"
+                          x:Name="mnuEditItems"
+                          IsCheckable="True"
+                          >
+                </MenuItem>
+                <MenuItem Header="Restore Defaults"
+                          x:Name="mnuRestoreDefaults"
+                          IsCheckable="True"
+                          >
+
+                </MenuItem>
+                <MenuItem Header="Exit"
+                          Command="{Binding Path=DataContext.ExitAppCmd, 
+                                            RelativeSource={RelativeSource Mode=FindAncestor, 
+                                            AncestorType={x:Type Window}}}"
+                          CommandParameter="{Binding}"
+                          >
+                    <MenuItem.Icon>
+                        <Image Source="Images/Exit_16x.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <!--#endregion MenuBar-->
+
+        <!--Title Label. Contains the title of the app in a textblock. Also contains
+        two popup windows which are not visible by default and are selected by a menu 
+        button. They align with the bottom of the label.-->
+        <Label x:Name="lblTitle" 
+               Grid.Row="1"   
+               Style="{StaticResource headerFontSize}"
+               FontFamily="{StaticResource mainFont}"
+               HorizontalContentAlignment="Center" 
+               VerticalContentAlignment="Top"
+               Background="{DynamicResource mainColor}"
+               BorderBrush="{DynamicResource borderColor}"  
+               BorderThickness="0,0,0,2"
+               >
+            <StackPanel>
+                <TextBlock Text="Shopping List"/>
+
+                <!--Two popups aligned with the bottom of the label opened by main
+                menu items. One is for editing categories and one for editing the 
+                items library.-->
+                
+                <!--#region Popups-->
+                
+                <!--Edit categories popup contains 4 basic elements:
+                A text box and button to add a new category,
+                a combobox and button to delete an existing category,
+                a combobox, textbox and button to change an existing category,
+                and an items container to display the list of categories.
+                The popup is set to stay open with a toggle button bound to the 
+                ischecked of the menu item responsible for closing it.-->
+                <Popup x:Name="popCategories"
+                       IsOpen="{Binding IsChecked, ElementName=mnuEditCats}"
+                       Width="{Binding ElementName=lblTitle, Path=ActualWidth}"
+                       Height="300"
+                       PlacementTarget="{Binding ElementName=lblTitle}"
+                       Placement="Bottom"
+                       StaysOpen="True"
+                       >
+                    <Border BorderBrush="{StaticResource borderColor}"
+                            BorderThickness="2,0,2,2"
+                            Background="{StaticResource secondColor}"
+                            >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0"
+                                   Grid.ColumnSpan="4"
+                                   Content="Edit Categories"
+                                   Style="{StaticResource headerFontSize}"
+                                   BorderBrush="{StaticResource borderColor}"
+                                   BorderThickness="0,0,0,2"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   />
+
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   Content="Add New Category:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <TextBox x:Name="txtNewCategory"
+                                     Grid.Row="1"
+                                     Grid.Column="1"
+                                     Style="{StaticResource subFontSize}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Center"
+                                     Width="150"
+                                     Height="30"
+                                     />
+
+                            <Button x:Name="btnNewCategory"
+                                    Style="{StaticResource myControlButton}"
+                                    Height="30"
+                                    Width="30"
+                                    HorizontalAlignment="Left"
+                                    BorderBrush="{StaticResource borderColor}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource thirdColor}"
+                                    Command="{Binding Path=DataContext.AddCategoryCmd,
+                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                      AncestorType={x:Type Window}}}"
+                                    CommandParameter="{Binding Path=Text, ElementName=txtNewCategory}"
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    >
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="OK"
+                                           />
+                            </Button>
+
+                            <Label Grid.Row="2"
+                                   Grid.Column="0"
+                                   Content="Delete Category:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <ComboBox x:Name="cmbDeleteCategory"
+                                      Grid.Column="1"
+                                      Grid.Row="2"
+                                      ItemsSource="{Binding Path=.shoppingListCategories.categories,
+                                                           Mode=TwoWay,
+                                                           UpdateSourceTrigger=PropertyChanged}"
+                                      Width="150"
+                                      Height="30"
+                                      DisplayMemberPath="CategoryTitle"
+                                      Style="{StaticResource subFontSize}"
+                                      HorizontalAlignment="Left"
+                                      />
+
+                            <Button x:Name="btnDeleteCategory"
+                                    Style="{StaticResource myControlButton}"
+                                    Height="30"
+                                    Width="30"
+                                    HorizontalAlignment="Left"
+                                    BorderBrush="{StaticResource borderColor}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource thirdColor}"
+                                    Command="{Binding Path=DataContext.RemoveCategoryCmd,
+                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                      AncestorType={x:Type Window}}}"
+                                    CommandParameter="{Binding Path=SelectedItem, ElementName=cmbDeleteCategory}"
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    >
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="OK"
+                                           />
+                            </Button>
+
+                            <Label Grid.Row="3"
+                                   Grid.Column="0"
+                                   Content="Edit Category:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <StackPanel Grid.Column="1" Grid.Row="3">
+                                <ComboBox x:Name="cmbEditCategory"                              
+                                          ItemsSource="{Binding Path=.shoppingListCategories.categories,
+                                                                Mode=TwoWay,
+                                                                UpdateSourceTrigger=PropertyChanged}"
+                                          Width="150"
+                                          Height="30"
+                                          DisplayMemberPath="CategoryTitle"
+                                          Style="{StaticResource subFontSize}"
+                                          HorizontalAlignment="Left"
+                                          />
+
+                                <TextBox x:Name="txtEditCategory"
+                                         Style="{StaticResource subFontSize}"
+                                         HorizontalAlignment="Left"
+                                         VerticalAlignment="Center"
+                                         Width="150"
+                                         Height="30"
+                                         />
+                            </StackPanel>
+
+                            <Button x:Name="btnEditCategory"
+                                    Style="{StaticResource myControlButton}"
+                                    Height="30"
+                                    Width="30"
+                                    HorizontalAlignment="Left"
+                                    BorderBrush="{StaticResource borderColor}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource thirdColor}"
+                                    Command="{Binding Path=DataContext.EditCategoryCmd,
+                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                      AncestorType={x:Type Window}}}"
+                                    
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    >
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource comboConverter}">
+                                        <Binding Path="Text" ElementName="cmbEditCategory"/>
+                                        <Binding Path="Text" ElementName="txtEditCategory"/>
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="OK"
+                                           />
+                            </Button>
+
+                            <ItemsControl Grid.Column="3"
+                                          Grid.Row="1"
+                                          Grid.RowSpan="4"
+                                          ItemsSource="{Binding Path=.shoppingListCategories.categories}"
+                                          Width="150"
+                                          Height="250"
+                                          Margin="5,20,5,10"
+                                          Style="{StaticResource subFontSize}"
+                                          DisplayMemberPath="CategoryTitle"
+                                          />
+
+
+
+                            <ToggleButton IsChecked="{Binding IsChecked, ElementName=mnuEditCats, Mode=TwoWay}"
+                                          Grid.Row="4"
+                                          Grid.ColumnSpan="4"
+                                          Content="OK"
+                                          Width="60"
+                                          Height="30"
+                                          FontSize="16"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          BorderThickness="2"
+                                          BorderBrush="{DynamicResource borderColor}"
+                                          Background="{DynamicResource mainColor}"
+                                          />
+                        </Grid>
+                    </Border>
+                </Popup>
+
+                
+                <!--Edit items library popup contains 4 basic elements:
+                A combobox to select the category,
+                a text box and button to add a new item to the selected category,
+                a combobox and button to delete an existing item from the selected 
+                category,
+                and an items container to display the list of items in the selected
+                category.
+                The popup is set to stay open with a toggle button bound to the 
+                ischecked of the menu item responsible for closing it.-->
+                <Popup x:Name="popItemLibrary"
+                       IsOpen="{Binding IsChecked, ElementName=mnuEditItems}"
+                       Width="{Binding ElementName=lblTitle, Path=ActualWidth}"
+                       Height="300"
+                       PlacementTarget="{Binding ElementName=lblTitle}"
+                       Placement="Bottom"
+                       StaysOpen="True"
+                       >
+                    <Border BorderBrush="{StaticResource borderColor}"
+                            BorderThickness="2,0,2,2"
+                            Background="{StaticResource secondColor}"
+                            >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0"
+                                   Grid.ColumnSpan="4"
+                                   Content="Edit Item Library"
+                                   Style="{StaticResource headerFontSize}"
+                                   BorderBrush="{StaticResource borderColor}"
+                                   BorderThickness="0,0,0,2"
+                                   HorizontalContentAlignment="Center"
+                                   VerticalContentAlignment="Center"
+                                   />
+
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   Content="Select Category:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <ComboBox x:Name="cmbSelectCategory"  
+                                          Grid.Row="1"
+                                          Grid.Column="1"
+                                          ItemsSource="{Binding Path=.shoppingListCategories.categories}"
+                                          Width="150"
+                                          Height="30"
+                                          DisplayMemberPath="CategoryTitle"
+                                          Style="{StaticResource subFontSize}"
+                                          HorizontalAlignment="Left"
+                                          />
+
+
+                            <Label Grid.Row="2"
+                                   Grid.Column="0"
+                                   Content="Add New Item:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <TextBox x:Name="txtNewItem"
+                                     Grid.Row="2"
+                                     Grid.Column="1"
+                                     Style="{StaticResource subFontSize}"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Center"
+                                     Width="150"
+                                     Height="30"
+                                     />
+
+                            <Button x:Name="btnNewItem"
+                                    Style="{StaticResource myControlButton}"
+                                    Height="30"
+                                    Width="30"
+                                    HorizontalAlignment="Left"
+                                    BorderBrush="{StaticResource borderColor}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource thirdColor}"
+                                    Command="{Binding Path=DataContext.AddItemToLibraryCmd,
+                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                      AncestorType={x:Type Window}}}"
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    >
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource myConverter}">
+                                        <Binding Path="Text" ElementName="txtNewItem"/>
+                                        <Binding Path="Text" ElementName="cmbSelectCategory"/>
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="OK"
+                                           />
+                            </Button>
+
+                            <Label Grid.Row="3"
+                                   Grid.Column="0"
+                                   Content="Delete Item:"
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"                                 
+                                   />
+
+                            <ComboBox x:Name="cmbDeleteItem"
+                                      Grid.Column="1"
+                                      Grid.Row="3"
+                                      ItemsSource="{Binding ElementName=cmbSelectCategory, Path=SelectedValue.ShoppingListItems}"
+                                      Width="150"
+                                      Height="30"
+                                      DisplayMemberPath="Item"
+                                      Style="{StaticResource subFontSize}"
+                                      HorizontalAlignment="Left"
+                                      />
+
+                            <Button x:Name="btnDeleteItem"
+                                    Style="{StaticResource myControlButton}"
+                                    Height="30"
+                                    Width="30"
+                                    HorizontalAlignment="Left"
+                                    BorderBrush="{StaticResource borderColor}"
+                                    BorderThickness="2"
+                                    Background="{DynamicResource thirdColor}"
+                                    Command="{Binding Path=DataContext.RemoveItemFromLibraryCmd,
+                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                      AncestorType={x:Type Window}}}"
+                                    CommandParameter="{Binding Path=SelectedItem, ElementName=cmbDeleteItem}"
+                                    Grid.Row="3"
+                                    Grid.Column="2"
+                                    >
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Text="OK"
+                                           />
+                            </Button>
+
+                            <ItemsControl Grid.Column="3"
+                                          Grid.Row="1"
+                                          Grid.RowSpan="4"
+                                          ItemsSource="{Binding ElementName=cmbSelectCategory, Path=SelectedValue.ShoppingListItems}"
+                                          Width="150"
+                                          Height="250"
+                                          Margin="5,20,5,10"
+                                          Style="{StaticResource subFontSize}"
+                                          DisplayMemberPath="Item"
+                                          />
+
+
+
+                            <ToggleButton IsChecked="{Binding IsChecked, ElementName=mnuEditItems, Mode=TwoWay}"
+                                          Grid.Row="4"
+                                          Grid.ColumnSpan="4"
+                                          Content="OK"
+                                          Width="60"
+                                          Height="30"
+                                          FontSize="16"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          BorderThickness="2"
+                                          BorderBrush="{DynamicResource borderColor}"
+                                          Background="{DynamicResource mainColor}"
+                                          />
+                        </Grid>
+                    </Border>
+                </Popup>
+                
+                
+                <!--OK/Cancel popup window for the Restore Defaults button-->
+                <Popup x:Name="popRestoreDefaults"
+                       IsOpen="{Binding IsChecked, ElementName=mnuRestoreDefaults}"
+                       Width="250"
+                       Height="Auto"
+                       PlacementTarget="{Binding ElementName=mainGrid}"
+                       Placement="Center"
+                       StaysOpen="True"
+                       >
+                    <Border BorderBrush="{StaticResource borderColor}"
+                            BorderThickness="2,2,2,2"
+                            Background="{StaticResource secondColor}"
+                            >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0"
+                                   Grid.ColumnSpan="2"                         
+                                   Style="{StaticResource subFontSize}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"                                 
+                                   >
+                                <TextBlock Text="Are you sure you want to restore 
+                                           the default Categories and 
+                                           Items Libraries? (This cannot be undone)"
+                                           TextWrapping="Wrap"
+                                       />
+                            </Label>
+
+                            <ToggleButton IsChecked="{Binding IsChecked, ElementName=mnuRestoreDefaults, Mode=TwoWay}"
+                                          Grid.Row="2"
+                                          Grid.Column="0"
+                                          Content="Cancel"
+                                          Width="75"
+                                          Height="30"
+                                          Style="{StaticResource subFontSize}"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          BorderThickness="2"
+                                          BorderBrush="{DynamicResource borderColor}"
+                                          Background="{DynamicResource mainColor}"
+                                          />
+                            <ToggleButton IsChecked="{Binding IsChecked, ElementName=mnuRestoreDefaults, Mode=TwoWay}"
+                                          Grid.Row="2"
+                                          Grid.Column="1"
+                                          Content="OK"
+                                          Width="75"
+                                          Height="30"
+                                          Style="{StaticResource subFontSize}"
+                                          HorizontalContentAlignment="Center"
+                                          VerticalContentAlignment="Center"
+                                          BorderThickness="2"
+                                          BorderBrush="{DynamicResource borderColor}"
+                                          Background="{DynamicResource mainColor}"
+                                          Command="{Binding Path=DataContext.RestoreDefaultsCmd, 
+                                                    RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                    AncestorType={x:Type Window}}}"
+                                          CommandParameter="{Binding}"
+                                          />
+                        </Grid>
+                    </Border>
+                </Popup>
+
+                <!--#endregion Popups-->
+                
+            </StackPanel>
+        </Label>
+
+        <!--List Box. This is the container for the category expanders. The box is bound to
+        the ViewModel's main list and places the expanders in an item template.-->
+        <ListBox x:Name="lstMain" 
+                 Grid.Row="2" Background="{DynamicResource mainColor}" 
+                 Margin="0" 
+                 Padding="0" 
+                 BorderThickness="0"
+                 ItemsSource="{Binding Path=.shoppingListCategories.categories, 
+                                       Mode=TwoWay, 
+                                       UpdateSourceTrigger=PropertyChanged}"
+                 FontFamily="{StaticResource mainFont}"
+                 ScrollViewer.CanContentScroll="True"
+                 ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 MaxHeight="600"
+                 >
+            <!--Item Template for ListBox. Contains an expander based on a template in 
+            App Resources. The expander header content is bound to the Category property
+            of the ViewModel's main list. 
+            The expander contains a grid of two columns: the left one contains a button
+            and the right one contains an Items Container control.-->        
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Expander x:Name="expCategory"
+                              Template="{StaticResource MyExpander}"
+                              OverridesDefaultStyle="True"
+                              Header="{Binding Path=.CategoryTitle, 
+                                               Mode=TwoWay, 
+                                               UpdateSourceTrigger=PropertyChanged}"
+                              >
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <!--The Toggle Button in the first column of the grid triggers 
+                            a Popup-->
+                            <ToggleButton x:Name="btnItemsPopup"
+                                          Height="60"
+                                          Width="60"
+                                          BorderThickness="2"
+                                          BorderBrush="{DynamicResource borderColor}"
+                                          Background="{DynamicResource mainColor}"
+                                          Content="Add Item"
+                                          Grid.Column="0"          
+                                    />
+                            <!--The Popup is bound to the Toggle Button. It contains a grid with
+                            two rows. The first row contains an Items Control which is bound to 
+                            the Shopping List Items property in the main list. The Items Control
+                            contains a Wrap Panel.-->
+                            <Popup IsOpen="{Binding IsChecked, ElementName=btnItemsPopup}"
+                                   StaysOpen="False"
+                                   PlacementTarget="{Binding ElementName=expCategory}"
+                                   Placement="Bottom"
+                                   Width="{Binding ElementName=expCategory, Path=ActualWidth}"
+                                   >
+                                <Border BorderBrush="{StaticResource borderColor}"
+                                        BorderThickness="2"
+                                        >
+
+                                    <ItemsControl ItemsSource="{Binding Path=.ShoppingListItems, 
+                                                                        Mode=TwoWay, 
+                                                                        UpdateSourceTrigger=PropertyChanged}"
+                                                  >
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Background="{DynamicResource mainColor}"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <!--Item Control Template uses a custom button from App 
+                                        Resources. The button click is bound to the Add Item Command
+                                        in the ViewModel. The button contains a Text Block bound to 
+                                        the Item property of the Shopping List Items list.-->
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource myControlButton}"
+                                                        MinHeight="30"
+                                                        MinWidth="40"
+                                                        Margin="2,2,2,2"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource borderColor}"
+                                                        Background="{DynamicResource thirdColor}"
+                                                        >
+                                                    <Button.InputBindings>
+                                                        <MouseBinding Gesture="LeftClick" 
+                                                                      Command="{Binding Path=DataContext.AddItemCmd, 
+                                                                      RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                      AncestorType={x:Type Window}}}"
+                                                                      CommandParameter="{Binding}"
+                                                                      />
+                                                    </Button.InputBindings>
+                                                    <TextBlock Text="{Binding Path=.Item, 
+                                                                              Mode=TwoWay, 
+                                                                              UpdateSourceTrigger=PropertyChanged}" 
+                                                               HorizontalAlignment="Center" 
+                                                               FontFamily="{StaticResource mainFont}"
+                                                               Grid.Row="0"
+                                                               />
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Border>
+                            </Popup>
+
+                            <!--The second column of the expander's grid contains an Items Control. The control 
+                            is bound to the Shopping List property of the ViewModel's main list. 
+                            It contains a Wrap Panel.-->
+                            <ItemsControl Grid.Column="1" 
+                                          ItemsSource="{Binding Path=.ShoppingList, 
+                                                                Mode=TwoWay, 
+                                                                UpdateSourceTrigger=PropertyChanged}"
+                                          >
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Background="{DynamicResource secondColor}" 
+                                                   MinHeight="50"
+                                                   />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <!--Item Control Template uses a custom button from App Resources.
+                                The left button click is bound to the Increase Amount Command and
+                                the right button click is bound to the Decrease Amount Command in 
+                                the ViewModel. 
+                                The button contains two Text Blocks bound to the Item and Amount 
+                                properties of the Shopping List list.
+                                The button also contains a small button bound to the Remove Item 
+                                Command in the ViewModel.-->
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{StaticResource myControlButton}"
+                                                MinHeight="50"
+                                                MinWidth="75"
+                                                Margin="5,2,5,2"
+                                                BorderThickness="2"
+                                                BorderBrush="{DynamicResource borderColor}"
+                                                Background="{DynamicResource thirdColor}"
+                                                >
+                                            <Button.InputBindings>
+                                                <MouseBinding Gesture="LeftClick" 
+                                                              Command="{Binding Path=DataContext.IncreaseAmountCmd, 
+                                                                                RelativeSource=
+                                                                                {RelativeSource Mode=FindAncestor, 
+                                                                                AncestorType={x:Type Window}}}"
+                                                              CommandParameter="{Binding}"
+                                                              />
+                                                <MouseBinding Gesture="RightClick" 
+                                                              Command="{Binding Path=DataContext.DecreaseAmountCmd, 
+                                                                                RelativeSource=
+                                                                                {RelativeSource Mode=FindAncestor, 
+                                                                                AncestorType={x:Type Window}}}"
+                                                              CommandParameter="{Binding}"
+                                                              />
+                                            </Button.InputBindings>
+
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+
+                                                <Button Style="{StaticResource myControlButton}"
+                                                        Height="10"
+                                                        Width="10"
+                                                        Grid.Column="0" 
+                                                        Grid.Row="0"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource borderColor}"
+                                                        Background="{DynamicResource mainColor}"
+                                                        Command="{Binding Path=DataContext.RemoveItemCmd, 
+                                                                          RelativeSource=
+                                                                          {RelativeSource Mode=FindAncestor, 
+                                                                          AncestorType={x:Type Window}}}"
+                                                        CommandParameter="{Binding}"
+                                                        />
+                                                <StackPanel Grid.ColumnSpan="2" Grid.Row="1">
+                                                    <TextBlock Text="{Binding Path=.Item, 
+                                                                              Mode=TwoWay, 
+                                                                              UpdateSourceTrigger=PropertyChanged}" 
+                                                               HorizontalAlignment="Center" 
+                                                               FontFamily="{StaticResource mainFont}"
+                                                               />
+                                                    <TextBlock Text="{Binding Path=.Amount, 
+                                                                              Mode=TwoWay, 
+                                                                              UpdateSourceTrigger=PropertyChanged}" 
+                                                               HorizontalAlignment="Center" 
+                                                               FontFamily="{StaticResource mainFont}"
+                                                               />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Expander>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>    
+   

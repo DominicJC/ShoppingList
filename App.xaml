@@ -1,0 +1,258 @@
+﻿<Application x:Class="ShoppingList.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ShoppingList"
+             xmlns:help="clr-namespace:ShoppingList.Helpers"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             StartupUri="MainWindow.xaml"
+             >
+    <Application.Resources>
+
+        <!--File Paths/Names for Saved Lists-->
+        <System:String x:Key="LISTPATH">ShoppingList.csv</System:String>
+        <System:String x:Key="LASTLISTPATH">LastShoppingList.csv</System:String>
+        <System:String x:Key="ITEMSPATH">Items.csv</System:String>
+        <System:String x:Key="CATEGORIESPATH">Categories.csv</System:String>
+
+        <!--Default Category Constant-->
+        <System:String x:Key="DEFAULTCATEGORY">Misc</System:String>
+
+        <!--Colours for use in application-->
+        <!--Background colours-->
+        <SolidColorBrush x:Key="mainColor" Color="PaleGreen"/>
+        <SolidColorBrush x:Key="secondColor" Color="SpringGreen"/>
+        <SolidColorBrush x:Key="thirdColor" Color="LimeGreen"/>
+        
+        <!--Font colours-->
+        <SolidColorBrush x:Key="mainFontColour" Color="Black"/>
+        <SolidColorBrush x:Key="secondFontColor" Color="WhiteSmoke"/>
+        <SolidColorBrush x:Key="thirdFontColor" Color="DarkGreen"/>
+        
+        <!--Borders-->
+        <SolidColorBrush x:Key="borderColor" Color="Black"/>
+        
+        <!--Fonts to use in application-->
+        <FontFamily x:Key="mainFont">Century Gothic</FontFamily>
+        
+        <!--Font sizes-->
+        <Style x:Key="headerFontSize" TargetType="Control">
+            <Setter Property="FontSize" Value="24"/>
+        </Style>
+        <Style x:Key="subFontSize" TargetType="Control">
+            <Setter Property="FontSize" Value="15"/>
+        </Style>
+
+        <!--Converter for multibinding parameters-->
+        <help:StringToShoppingListElementConverter x:Key="myConverter"/>
+        <help:MultiStringToStringArrayConverter x:Key="comboConverter"/>
+
+
+        <!--Custom expander template below includes custom toggle button, header, triggers
+        and expander content. Explicitly applied with key MyExpander-->
+        <!--#region CustomExpander-->
+        <!--Expander Toggle Button Template-->
+        <ControlTemplate x:Key="MyExpanderToggleButton" TargetType="{x:Type ToggleButton}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Rectangle Fill="Transparent"
+                           Grid.ColumnSpan="2"/>
+
+                <Rectangle Name="IconRectangle"
+                           Grid.Column="0"
+                           Stroke="{DynamicResource mainColor}"
+                           Width="50"
+                           Height="50"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Fill="{DynamicResource mainColor}"/>
+
+                <Path x:Name="HeaderIcon"
+                      Grid.Column="0"
+                      Data="M 0 5 L 10 15 L 20 5 Z"
+                      Stroke="{DynamicResource mainFontColour}"
+                      Width="20"
+                      Height="20"
+                      StrokeThickness="1"
+                      Fill="{DynamicResource mainFontColour}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"/>
+
+                <Rectangle Fill="{StaticResource mainColor}" Grid.Column="1"/>
+
+                <ContentPresenter x:Name="HeaderContent"
+                                  Grid.Column="1"
+                                  Margin="4,0,0,0"
+                                  ContentSource="Content"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center"
+                                  TextBlock.FontSize="22"
+                                  TextBlock.FontWeight="Regular"
+                                  TextBlock.FontFamily="{StaticResource mainFont}"
+                                  />
+            </Grid>
+            
+            
+            <!--Triggers to change behaviours-->
+            <ControlTemplate.Triggers>
+                <!--Change the icon when expander is toggled-->
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Data"
+                            TargetName="HeaderIcon"
+                            Value="M 0 15 L 10 5 L 20 15 Z"/>
+                </Trigger>
+                
+                <!--Change icon colour when mouse is over header-->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Stroke"
+                            Value="{DynamicResource secondColor}"
+                            TargetName="HeaderIcon"/>
+                    <Setter Property="Fill"
+                            Value="{DynamicResource secondColor}"
+                            TargetName="HeaderIcon"/>
+                </Trigger>
+                
+                <!--Change icon colour when header is clicked-->
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Stroke"
+                            Value="{DynamicResource thirdFontColor}"
+                            TargetName="HeaderIcon"/>
+                    <Setter Property="Fill"
+                            Value="{DynamicResource thirdFontColor}"
+                            TargetName="HeaderIcon"/>
+                </Trigger>
+                
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        
+        <!--Custom Expander Template-->
+        <ControlTemplate x:Key="MyExpander" TargetType="{x:Type Expander}">
+
+            <DockPanel Background="{DynamicResource secondColor}">
+                <ToggleButton x:Name="ExpanderButton"
+                              DockPanel.Dock="Top"
+                              Template="{StaticResource MyExpanderToggleButton}"
+                              Content="{TemplateBinding Header}"
+                              IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                              OverridesDefaultStyle="True"/>
+
+                <ContentPresenter x:Name="ExpanderContent"
+                                  Grid.Row="1"
+                                  Visibility="Collapsed"
+                                  DockPanel.Dock="Bottom"
+                                  Margin="4"
+                                  MinHeight="50"
+                                  IsEnabled="False">
+                </ContentPresenter>
+            </DockPanel>
+
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsExpanded" Value="True">
+                    <Setter TargetName="ExpanderContent" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="ExpanderContent" Property="IsEnabled" Value="True"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+            
+        </ControlTemplate>
+        <!--#endregion CustomExpander-->
+        
+        <!--Custom ListBoxItem template. Implicitly targeted at all ListBoxItems-->
+        <!--#region CustomListboxItem-->
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Background" Value="{DynamicResource mainColour}" />
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <StackPanel Background="{TemplateBinding Background}">
+
+                            <ContentPresenter
+                              x:Name="contentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"/>
+
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--#endregion CustomListboxItem-->
+
+        <!--Custom button for displaying items. Explicitly applied with key myControlButton-->
+        <!--#region CustomButton-->
+        <Style x:Key="myControlButton" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border MinHeight="{TemplateBinding MinHeight}"
+                                MinWidth="{TemplateBinding MinWidth}"
+                                CornerRadius="4"
+                                Margin="{TemplateBinding Margin}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"                             
+                                >
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <!--#endregion CustomButton-->
+
+
+        <!-- Custom Menu Item Header Template. Explicitly applied with key myMenuHeader-->
+        <!--#region CustomMenuHeader-->
+        <ControlTemplate x:Key="myMenuHeader" TargetType="{x:Type MenuItem}">
+            <Border x:Name="Border">
+                <Grid>
+                    <ContentPresenter Margin="6,3,6,3" 
+                                      ContentSource="Header"
+                                      RecognizesAccessKey="True" />
+                    <Popup Name="Popup"
+                           Placement="Bottom"
+                           IsOpen="{TemplateBinding IsSubmenuOpen}" 
+                           Focusable="False"
+                           PopupAnimation="Fade">
+                        
+                        <Border Name="SubmenuBorder"
+                                SnapsToDevicePixels="True"
+                                Background="{StaticResource secondColor}"
+                                BorderBrush="{StaticResource borderColor}"
+                                BorderThickness="1" >
+                            
+                            <ScrollViewer CanContentScroll="False">
+                                <StackPanel IsItemsHost="True" 
+                                            KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Grid>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSuspendingPopupAnimation" Value="true">
+                    <Setter TargetName="Popup" Property="PopupAnimation" Value="None"/>
+                </Trigger>
+                <Trigger Property="IsHighlighted" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="{StaticResource mainColor}"/>
+                    <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
+                </Trigger>
+                <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
+                    <Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="0,0,4,4"/>
+                    <Setter TargetName="SubmenuBorder" Property="Padding" Value="0,0,0,3"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{StaticResource mainFontColour}"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <!--#endregion CustomMenuHeader-->
+
+    </Application.Resources>
+</Application>
